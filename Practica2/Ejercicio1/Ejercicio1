@@ -1,0 +1,61 @@
+1.-Para modificar la clase buffer lo que he hecho a sido añadir 2 condiciones: 
+-Puede_leer: Esta Condicion lo que hace es controlar que el buffer no este vacio y si esta vacio invoca al metodo await() para que se bloquee la hebra y no se pueda leer nada.
+-Puede_producir: Esta condicion lo que hace es controlar que el buffer no este lleno y en el caso de que este lleno detiene a la hebra para que no se produzca nada.
+
+2.-
+
+class Buffer extends AbstractMonitor
+{
+	private int numSlots = 0, cont = 0;   
+	private double[] buffer = null;
+  	private Condition puede_producir = makeCondition() ;
+  	private Condition puede_leer = makeCondition() ;
+
+  	public Buffer( int p_numSlots ){ 
+		numSlots = p_numSlots ; 
+	    	buffer = new double[numSlots] ;
+  	}	
+  	public void depositar( double valor )
+	{
+		enter();    		
+		if( cont == numSlots ) puede_producir.await();    //Los productores esperan a que quede hueco              
+    		buffer[cont] = valor; cont++;      
+    		puede_leer.signal();                          //Los consumidores pueden coger objetos
+		leave();  
+  	}
+
+  	public double extraer()
+	  {		
+		  enter();
+		    double valor;
+    		if( cont == 0 ) puede_leer.await(); ;       //Los consumidores esperan a que hayan objetos
+    		cont--; valor = buffer[cont] ;
+    		puede_producir.signal();                    //Los productores pueden producir objetos
+		  leave();
+    		return valor;
+		}
+}
+
+3.-
+java EjemploProductorConsumidor 2 2 3 5 5 
+
+productor 1, produciendo 100.0
+productor 0, produciendo 0.0
+productor 0, produciendo 1.0
+productor 0, produciendo 2.0
+consumidor 0, consumiendo 100.0
+consumidor 1, consumiendo 2.0
+productor 1, produciendo 101.0
+consumidor 0, consumiendo 1.0
+consumidor 0, consumiendo 0.0
+productor 0, produciendo 3.0
+consumidor 1, consumiendo 101.0
+productor 1, produciendo 102.0
+consumidor 0, consumiendo 3.0
+consumidor 1, consumiendo 102.0
+productor 1, produciendo 103.0
+productor 0, produciendo 4.0
+productor 1, produciendo 104.0
+consumidor 1, consumiendo 4.0
+consumidor 1, consumiendo 104.0
+consumidor 0, consumiendo 103.0

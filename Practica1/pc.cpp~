@@ -1,0 +1,34 @@
+#include <iostream>
+#include <pthread.h>
+using namespace std;
+
+int producir_dato() {
+	static int contador = 1 ;
+	return contador ++ ;
+}
+
+void consumir_dato( int dato)
+{
+cout << "dato recibido: " << dato << endl;
+}
+
+void * productor( void * ) {
+	int primera_libre = 0;
+	int vector_datos [tam_vec];
+	for( unsigned i = 0 ; i < num_items ; i++ ) {
+		int dato = producir_dato() ;
+		vector_datos [primera_libre] = dato;
+		primera_libre++				
+	}
+	return NULL ;
+}
+
+void * consumidor( void * ) {
+	for( unsigned i = 0 ; i < num_items ; i++ ) {
+		int dato ;
+		dato = vector_datos
+		consumir_dato( dato ) ;
+	}
+	return NULL ;
+
+}
